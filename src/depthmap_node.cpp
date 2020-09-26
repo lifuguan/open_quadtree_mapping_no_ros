@@ -29,7 +29,7 @@
 
 using namespace std;
 
-quadmap::DepthmapNode::DepthmapNode(ros::NodeHandle &nh) : nh_(nh), num_msgs_(0)
+quadmap::DepthmapNode::DepthmapNode() : num_msgs_(0)
 {
 }
 
@@ -73,9 +73,6 @@ bool quadmap::DepthmapNode::init()
     depthmap_ = std::make_shared<quadmap::Depthmap>(resize_width, resize_height, resize_fx, resize_cx, resize_fy,
                                                     resize_cy, undist_map1, undist_map2, semi2dense_ratio);
 
-    bool pub_pointcloud = false;
-    publisher_.reset(new quadmap::Publisher(nh_, depthmap_));
-
     return true;
 }
 
@@ -101,12 +98,15 @@ void quadmap::DepthmapNode::Msg_Callback(const sensor_msgs::ImageConstPtr &image
         ROS_ERROR("cv_bridge exception: %s", e.what());
     }
 
+
+    // 获得当前关于世界坐标系下的位置姿态
     quadmap::SE3<float> T_world_curr(pose_input->pose.orientation.w, pose_input->pose.orientation.x,
                                      pose_input->pose.orientation.y, pose_input->pose.orientation.z,
                                      pose_input->pose.position.x, pose_input->pose.position.y,
                                      pose_input->pose.position.z);
 
     bool has_result;
+    // 最重要的部分：联系CUDA代码
     has_result = depthmap_->add_frames(img_8uC1, T_world_curr.inv());
     if (has_result)
         denoiseAndPublishResults();
@@ -115,5 +115,5 @@ void quadmap::DepthmapNode::Msg_Callback(const sensor_msgs::ImageConstPtr &image
 
 void quadmap::DepthmapNode::denoiseAndPublishResults()
 {
-    std::async(std::launch::async, &quadmap::Publisher::publishDepthmapAndPointCloud, *publisher_, curret_msg_time);
+    // TODO: imshow的形式或者使用OpenCV画图？？
 }

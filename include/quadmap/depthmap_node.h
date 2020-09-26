@@ -17,7 +17,6 @@
 #pragma once
 
 #include <quadmap/depthmap.h>
-#include <quadmap/publisher.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -29,20 +28,19 @@ namespace quadmap
 class DepthmapNode
 {
 public:
-  DepthmapNode(ros::NodeHandle &nh);
+  DepthmapNode();
   bool init();
   void Msg_Callback(
     const sensor_msgs::ImageConstPtr &image_input,
     const geometry_msgs::PoseStampedConstPtr &pose_input);
 private:
   void denoiseAndPublishResults();
-  void publishConvergenceMap();
 
+  // 共享智能指针
   std::shared_ptr<quadmap::Depthmap> depthmap_;
   int num_msgs_;
   ros::Time curret_msg_time;
-  ros::NodeHandle &nh_;
-  std::unique_ptr<quadmap::Publisher> publisher_;
+
 };
 
 }
