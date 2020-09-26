@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
+#include <dataset_reader/BenchmarkDatasetReader.h>
 
 #include <quadmap/depthmap.h>
 #include <sensor_msgs/Image.h>
@@ -25,22 +26,34 @@
 namespace quadmap
 {
 
-class DepthmapNode
-{
-public:
-  DepthmapNode();
-  bool init();
-  void Msg_Callback(
-    const sensor_msgs::ImageConstPtr &image_input,
-    const geometry_msgs::PoseStampedConstPtr &pose_input);
-private:
-  void denoiseAndPublishResults();
+    class DepthmapNode
+    {
+    public:
+        DepthmapNode();
 
-  // 共享智能指针
-  std::shared_ptr<quadmap::Depthmap> depthmap_;
-  int num_msgs_;
-  ros::Time curret_msg_time;
+        bool init();
 
-};
+        void readTumDataSet();
+
+        void Msg_Callback(const sensor_msgs::ImageConstPtr &image_input,
+                          const geometry_msgs::PoseStampedConstPtr &pose_input);
+
+    private:
+        void denoiseAndPublishResults();
+
+        const std::string dataset = "/home/robomaster/dataset";
+
+        // 共享智能指针
+        std::shared_ptr<quadmap::Depthmap> depthmap_;
+        int num_msgs_;
+        ros::Time curret_msg_time;
+
+        DatasetReader* reader;
+        Eigen::Matrix3f K_rect;
+        Eigen::Vector2i dim_rect;
+        Eigen::Matrix3f K_org;
+        Eigen::Vector2i dim_org;
+        float omega;
+    };
 
 }

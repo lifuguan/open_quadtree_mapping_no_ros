@@ -34,6 +34,8 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+    ${LIBZIP_INCLUDE_DIR_ZIP}
+    ${LIBZIP_INCLUDE_DIR_ZIPCONF}
 )
 
 # Set link libraries
@@ -50,8 +52,7 @@ add_executable(open_quadtree_mapping_node
     src/seed_matrix.cu
     src/depthmap.cpp
     src/depthmap_node.cpp
-    src/publisher.cpp
-    src/main_ros.cpp
+        src/main_cu.cpp
     )
 target_link_libraries(open_quadtree_mapping_node
 ${catkin_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES})
