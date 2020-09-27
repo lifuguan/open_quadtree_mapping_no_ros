@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# coding=utf-8
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2013, Juergen Sturm, TUM
@@ -116,13 +117,21 @@ if __name__ == '__main__':
     first_list = read_file_list(args.first_file)
     second_list = read_file_list(args.second_file)
 
-    matches = associate(first_list, second_list,float(args.offset),float(args.max_difference))    
+    matches = associate(first_list, second_list,float(args.offset),float(args.max_difference))
 
+
+    '''
+    将匹配队列写入文件
+    1. tuple.txt : depth.txt and rgb.txt
+    2. tuple_ground.txt : groundtruth.txt and rgb.txt
+    '''
+    w_file = open("/home/robomaster/dataset/rgbd/tuple_ground.txt", 'w+')
     if args.first_only:
         for a,b in matches:
             print("%f %s"%(a," ".join(first_list[a])))
     else:
         for a,b in matches:
-            print("%f %s %f %s"%(a," ".join(first_list[a]),b-float(args.offset)," ".join(second_list[b])))
+            w_file.write("%f %s %f %s"%(a," ".join(first_list[a]),b-float(args.offset)," ".join(second_list[b]))+os.linesep)
+    print ("Write finished.")
             
         
