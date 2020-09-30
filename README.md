@@ -47,3 +47,9 @@ sudo cp lib/zipconf.h /usr/local/include/zipconf.h
 ```
 
 ## Configure CMakeLists.txt
+
+```shell script
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local/ -D WITH_TBB=ON -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_V4L=ON -D WITH_QT=OFF -D WITH_OPENGL=ON -D OPENCV_EXTRA_MODULES_PATH=/home/robomaster/opencv_contrib/modules/ /home/robomaster/opencv-3.4.0/
+
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local/ -D OPENCV_EXTRA_MODULES_PATH=/home/robomaster/opencv_contrib/modules/ /home/robomaster/opencv-3.4.0/
+```
