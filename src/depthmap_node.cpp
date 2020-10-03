@@ -25,9 +25,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 
+
 using namespace std;
 
-quadmap::DepthmapNode::DepthmapNode() : num_msgs_(0)
+quadmap::DepthmapNode::DepthmapNode()
 {
 }
 
@@ -72,59 +73,9 @@ bool quadmap::DepthmapNode::init()
                                                     resize_cy, undist_map1, undist_map2, semi2dense_ratio);
 
 
-
     ///////////////////// 读取dataset //////////////////////
-    reader = new DatasetReader(dataset);
-    K_rect = reader->getUndistorter()->getK_rect();
-    dim_rect = reader->getUndistorter()->getOutputDims();
-
-    std::cout << "Rectified IMages: " << dim_rect[0] << " x " << dim_rect[1] << ". k;" << std::endl;
-    std::cout << K_rect << "\n\n";
-
-    K_org = reader->getUndistorter()->getK_org();
-    dim_org = reader->getUndistorter()->getInputDims();
-    omega = reader->getUndistorter()->getOmega();
-
-    std::cout << "Original images: " << dim_org[0] << " x " << dim_org[1] << ". omega = " << omega << " K;"
-              << std::endl;
-    std::cout << K_org << "\n\n";
+    reader = new DatasetReader(dataset_path, DatasetReader::RGB);
     return true;
-}
-
-
-void quadmap::DepthmapNode::Msg_Callback(const sensor_msgs::ImageConstPtr &image_input,
-                                         const geometry_msgs::PoseStampedConstPtr &pose_input)
-{
-    printf("\n\n\n");
-    num_msgs_ += 1;
-    curret_msg_time = image_input->header.stamp;
-    if (!depthmap_)
-    {
-        ROS_ERROR("depthmap not initialized. Call the DepthmapNode::init() method");
-        return;
-    }
-    cv::Mat img_8uC1;
-    try
-    {
-        cv_bridge::CvImageConstPtr cv_img_ptr = cv_bridge::toCvShare(image_input, sensor_msgs::image_encodings::MONO8);
-        img_8uC1 = cv_img_ptr->image;
-    } catch (cv_bridge::Exception &e)
-    {
-        ROS_ERROR("cv_bridge exception: %s", e.what());
-    }
-
-
-    // 获得当前关于世界坐标系下的位置姿态
-    quadmap::SE3<float> T_world_curr(pose_input->pose.orientation.w, pose_input->pose.orientation.x,
-                                     pose_input->pose.orientation.y, pose_input->pose.orientation.z,
-                                     pose_input->pose.position.x, pose_input->pose.position.y,
-                                     pose_input->pose.position.z);
-
-    bool has_result;
-    // 最重要的部分：联系CUDA代码
-    has_result = depthmap_->add_frames(img_8uC1, T_world_curr.inv());
-    if (has_result)
-        denoiseAndPublishResults();
 }
 
 
@@ -135,32 +86,29 @@ void quadmap::DepthmapNode::denoiseAndPublishResults()
 
 void quadmap::DepthmapNode::readTumDataSet()
 {
-    bool autoPlay = true;
-    bool rect = false;
-    bool removeGamma = false;
-    bool removeVignette = false;
-    bool killOverexposed = false;
-
-    for (int i = 0; i < reader->getNumImages(); i++)
+    while (true)
     {
-
-        ExposureImage *I = reader->getImage(i, rect, removeGamma, removeVignette, killOverexposed);
-        cv::imshow("Image", cv::Mat(I->h, I->w, CV_32F, I->image) * (1 / 255.0f));
-        printf("Read image %d, time %.5f, exposure %.5fms. Rect (r): %d, remove gamma (g) %d, remove vignette (v): %d, kill overesposed (o)%d\n",
-               I->id, I->timestamp, I->exposure_time, (int) rect, (int) removeGamma, (int) removeVignette,
-               (int) killOverexposed);
-
-
-        if (autoPlay)
+        std::vector<std::string> data_list = reader->readAndParseTxt("tuple_ground.txt");
+        if (data_list.size() < 3)
         {
-            cv::waitKey(1);
-        } else
-        {
-            cv::waitKey(0);
+            break;
         }
 
-        delete I;
-
+        // format : timestamp image_path timestamp tx ty tz qx qy qz qw
+        curret_msg_time = std::stod(data_list[0]);
+        std::string img_path = data_list[1];
+        cv::Mat source_img = cv::imread(dataset_path+img_path);
+        quadmap::SE3<float> T_world_curr(std::stod(data_list[9]), std::stod(data_list[6]), std::stod(data_list[7]),
+                                          std::stod(data_list[8]), std::stod(data_list[3]), std::stod(data_list[4]),
+                                          std::stod(data_list[5]));
+        bool has_result = depthmap_->add_frames(source_img, T_world_curr.inv());
+        if (has_result)
+        {
+            cv::Mat depthmap_mat = depthmap_->getDepthmap();
+            cv::imshow("test", source_img);
+        }
     }
+
+
     delete reader;
 }

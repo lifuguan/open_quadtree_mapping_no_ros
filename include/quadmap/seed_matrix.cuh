@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <cuda_runtime.h>
+
 #include <cstdlib>
 #include <ctime>
 #include <deque>

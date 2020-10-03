@@ -46,6 +46,9 @@ sudo make install
 sudo cp lib/zipconf.h /usr/local/include/zipconf.h
 ```
 
+## tupele_ground.txt file format
+The format of each line is `timestamp image_path timestamp tx ty tz qx qy qz qw`
+
 ## Configure CMakeLists.txt
 
 ```shell script

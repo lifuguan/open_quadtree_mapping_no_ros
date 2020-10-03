@@ -36,6 +36,7 @@ list(APPEND LINK_LIBS
 
 add_executable(open_quadtree_mapping_node
         src/check_cuda_device.cu
+        src/depthmap_node.cpp
         src/seed_matrix.cu
         src/depthmap.cpp
         src/main_cu.cpp

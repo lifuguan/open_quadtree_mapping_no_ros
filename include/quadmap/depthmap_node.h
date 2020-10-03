@@ -18,14 +18,9 @@
 #include <dataset_reader/BenchmarkDatasetReader.h>
 
 #include <quadmap/depthmap.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/PointCloud.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <ros/ros.h>
 
 namespace quadmap
 {
-
     class DepthmapNode
     {
     public:
@@ -34,26 +29,16 @@ namespace quadmap
         bool init();
 
         void readTumDataSet();
-
-        void Msg_Callback(const sensor_msgs::ImageConstPtr &image_input,
-                          const geometry_msgs::PoseStampedConstPtr &pose_input);
-
     private:
         void denoiseAndPublishResults();
 
-        const std::string dataset = "/home/robomaster/dataset";
+        const std::string dataset_path = "/home/robomaster/dataset/rgbd/";
 
         // 共享智能指针
         std::shared_ptr<quadmap::Depthmap> depthmap_;
         int num_msgs_;
-        ros::Time curret_msg_time;
+        double curret_msg_time;
 
         DatasetReader* reader;
-        Eigen::Matrix3f K_rect;
-        Eigen::Vector2i dim_rect;
-        Eigen::Matrix3f K_org;
-        Eigen::Vector2i dim_org;
-        float omega;
     };
-
 }

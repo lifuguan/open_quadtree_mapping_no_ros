@@ -24,6 +24,7 @@
 
 #include <opencv2/opencv.hpp>
 // #include <opencv2/gpu/gpu.hpp>//for opencv2
+
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudawarping.hpp>
 
