@@ -73,22 +73,22 @@ bool quadmap::DepthmapNode::init()
                                                     resize_cy, undist_map1, undist_map2, semi2dense_ratio);
 
 
-    ///////////////////// 读取dataset //////////////////////
+    ///////////////////// 读取dataset : 初始化实例 //////////////////////
     reader = new DatasetReader(dataset_path, DatasetReader::RGB);
     return true;
 }
 
-
-void quadmap::DepthmapNode::denoiseAndPublishResults()
-{
-    // TODO: imshow的形式或者使用OpenCV画图？？
-}
-
 void quadmap::DepthmapNode::readTumDataSet()
 {
+    cv::namedWindow("depth");
+    cv::namedWindow("test");
+    std::fstream ground_pair_file;
+    // 指定文件，并设置为只读
+    ground_pair_file.open(this->dataset_path + this->tuple_ground_file, std::ios::in);
     while (true)
     {
-        std::vector<std::string> data_list = reader->readAndParseTxt("tuple_ground.txt");
+        // 按行读txt并解析成字符串
+        std::vector<std::string> data_list = reader->readAndParseTxt(ground_pair_file);
         if (data_list.size() < 3)
         {
             break;
@@ -97,18 +97,32 @@ void quadmap::DepthmapNode::readTumDataSet()
         // format : timestamp image_path timestamp tx ty tz qx qy qz qw
         curret_msg_time = std::stod(data_list[0]);
         std::string img_path = data_list[1];
-        cv::Mat source_img = cv::imread(dataset_path+img_path);
+        cv::Mat source_img;
+
+        try
+        {
+            std::cout << "\n\ntarget : " << dataset_path+img_path << std::endl;
+            source_img = cv::imread(this->dataset_path+img_path, CV_8UC1);
+            cv::imshow("test", source_img);
+            if(cv::waitKey(5)==27)
+                break;
+        }
+        catch (cv::Exception &exception)
+        {
+            std::cout << exception.what() << std::endl;
+        }
         quadmap::SE3<float> T_world_curr(std::stod(data_list[9]), std::stod(data_list[6]), std::stod(data_list[7]),
                                           std::stod(data_list[8]), std::stod(data_list[3]), std::stod(data_list[4]),
                                           std::stod(data_list[5]));
         bool has_result = depthmap_->add_frames(source_img, T_world_curr.inv());
+        // 有结果则返回true，下一步可以读取深度图
         if (has_result)
         {
             cv::Mat depthmap_mat = depthmap_->getDepthmap();
-            cv::imshow("test", source_img);
+            cv::imshow("depth", depthmap_mat);
+            if(cv::waitKey(5) == 27)
+                break;
         }
     }
-
-
     delete reader;
 }

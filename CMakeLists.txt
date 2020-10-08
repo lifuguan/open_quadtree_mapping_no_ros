@@ -1,5 +1,5 @@
 SET(PROJECT_NAME open_quadtree_mapping)
-CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(${PROJECT_NAME} LANGUAGES CUDA CXX)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMakeModules/")
 
@@ -8,8 +8,8 @@ SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3 -use_fast_math)
 
 # Specify compute capability
 # NVIDIA Quardo T1000 compute capacity : 7.5
-list(APPEND CUDA_NVCC_FLAGS -arch=sm_75)
-list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_75,code=sm_75)
+list(APPEND CUDA_NVCC_FLAGS -arch=sm_70)
+list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_70,code=sm_70)
 
 SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
 

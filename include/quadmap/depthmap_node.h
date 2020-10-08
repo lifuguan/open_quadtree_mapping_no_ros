@@ -30,10 +30,8 @@ namespace quadmap
 
         void readTumDataSet();
     private:
-        void denoiseAndPublishResults();
-
         const std::string dataset_path = "/home/robomaster/dataset/rgbd/";
-
+        const std::string tuple_ground_file = "tuple_ground.txt";
         // 共享智能指针
         std::shared_ptr<quadmap::Depthmap> depthmap_;
         int num_msgs_;
