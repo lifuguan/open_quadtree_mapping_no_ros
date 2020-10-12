@@ -115,6 +115,8 @@ void quadmap::DepthmapNode::readTumDataSet()
                                           std::stod(data_list[8]), std::stod(data_list[3]), std::stod(data_list[4]),
                                           std::stod(data_list[5]));
         bool has_result = depthmap_->add_frames(source_img, T_world_curr.inv());
+
+
         // 有结果则返回true，下一步可以读取深度图
         if (has_result)
         {

@@ -43,3 +43,9 @@ add_executable(open_quadtree_mapping_node
         )
 target_link_libraries(open_quadtree_mapping_node
          ${OpenCV_LIBS} ${Boost_LIBRARIES})
+
+add_executable(quadtree_image_kernel_cpu
+        src/quadtree_image_kernel.cpp
+        )
+target_link_libraries(quadtree_image_kernel_cpu
+        ${OpenCV_LIBS} ${Boost_LIBRARIES})

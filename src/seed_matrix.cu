@@ -475,7 +475,11 @@ void quadmap::SeedMatrix::extract_depth()
   quadtree_block.y = 16;
   quadtree_grid.x = (width + quadtree_block.x - 1) / quadtree_block.x;
   quadtree_grid.y = (height + quadtree_block.y - 1) / quadtree_block.y;
-
+  /**
+   * quadtree_grid = (47, 30)  quadtree_block=(16, 16)
+   * 将其分成47*30个小图像，每个16*16，进行计算
+   */
+  // std::cout << quadtree_index.dev_ptr->width << "; " << quadtree_index.dev_ptr->height << std::endl;
   quadtree_image_kernal<<<quadtree_grid, quadtree_block>>>(quadtree_index.dev_ptr);
   cudaDeviceSynchronize();
 
