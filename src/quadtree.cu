@@ -18,21 +18,24 @@ namespace quadmap
 
     __global__ void quadtree_image_kernal(DeviceImage<int> *quadtree_devptr)
     {
+        // 获取该thread的全局ID
         const int x = threadIdx.x + blockIdx.x * blockDim.x;
         const int y = threadIdx.y + blockIdx.y * blockDim.y;
+
         const int width = quadtree_devptr->width;   // 752
         const int height = quadtree_devptr->height;  // 480
 
         const int local_x = threadIdx.x;
         const int local_y = threadIdx.y;
 
-        // 共享显存
+        // 在该block内与threads共享显存
         __shared__ float pyramid_intensity[16][16];
         __shared__ int pyramid_num[16][16];
         __shared__ bool approve[16][16];
 
         if (x >= width || y >= height)
             return;
+
 
         const float my_intensity = tex2D(income_image_tex, x + 0.5f, y + 0.5f);
         int pyramid_level = 0;
