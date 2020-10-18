@@ -49,3 +49,9 @@ add_executable(quadtree_image_kernel_cpu
         )
 target_link_libraries(quadtree_image_kernel_cpu
         ${OpenCV_LIBS} ${Boost_LIBRARIES})
+
+add_executable(quadtree_image_kernel_cpu_test
+        src/quadtree_image_kernel_test.cpp
+        )
+target_link_libraries(quadtree_image_kernel_cpu_test
+        ${OpenCV_LIBS} ${Boost_LIBRARIES})

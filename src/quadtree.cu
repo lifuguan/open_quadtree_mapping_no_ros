@@ -25,10 +25,12 @@ namespace quadmap
         const int width = quadtree_devptr->width;   // 752
         const int height = quadtree_devptr->height;  // 480
 
+        // block中的第一个像素的位置
         const int local_x = threadIdx.x;
         const int local_y = threadIdx.y;
 
         // 在该block内与threads共享显存
+        // 该block中的16*16个像素线程的共同
         __shared__ float pyramid_intensity[16][16];
         __shared__ int pyramid_num[16][16];
         __shared__ bool approve[16][16];
@@ -36,22 +38,25 @@ namespace quadmap
         if (x >= width || y >= height)
             return;
 
-
+        // 提取该像素的像素值
         const float my_intensity = tex2D(income_image_tex, x + 0.5f, y + 0.5f);
         int pyramid_level = 0;
         float average_color = my_intensity;
+        //
         pyramid_intensity[local_x][local_y] = my_intensity;
         pyramid_num[local_x][local_y] = 1;
 
-        //go to find the level
+        // 从16×16的最粗糙区块检测是否可以再分
         for (int i = 1; i <= 4; i++)
         {
             // << 左移一位（×2）
             int level_x = local_x - local_x % (1 << i);
             int level_y = local_y - local_y % (1 << i);
             int num_pixels = (1 << i) * (1 << i);
+            //
             bool I_AM_LAST_NODE = (local_x % (1 << (i - 1)) == 0) && (local_y % (1 << (i - 1)) == 0);
 
+            //
             if (I_AM_LAST_NODE && (level_x != local_x || level_y != local_y))
             {
                 // 原子相加
