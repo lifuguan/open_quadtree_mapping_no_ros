@@ -21,11 +21,14 @@ find_package(Eigen REQUIRED)
 
 find_package(Boost REQUIRED)
 
+find_package(OpenCL REQUIRED)
+
 include_directories(
         include
         ${OpenCV_INCLUDE_DIRS}
         ${Eigen_INCLUDE_DIRS}
         ${Boost_INCLUDE_DIRS}
+        ${OpenCL_INCLUDE_DIRS}
 )
 
 # Set link libraries
@@ -55,3 +58,8 @@ add_executable(quadtree_image_kernel_cpu_test
         )
 target_link_libraries(quadtree_image_kernel_cpu_test
         ${OpenCV_LIBS} ${Boost_LIBRARIES})
+
+set( OpenCL_LIBRARY "/usr/local/cuda-10.0/lib64/libOpenCL.so")
+add_executable (quadtree_image_kernel_cl src/quadtree_image_opencl.cpp)
+target_link_libraries (quadtree_image_kernel_cl ${OpenCL_LIBRARY} ${OpenCV_LIBS})
+message(${OpenCL_LIBRARY})

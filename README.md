@@ -56,3 +56,13 @@ cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local/ -D WITH_TB
 
 cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local/ -D OPENCV_EXTRA_MODULES_PATH=/home/robomaster/opencv_contrib/modules/ /home/robomaster/opencv-3.4.0/
 ```
+
+## Using OpenCL to build *quadtree_image_kernel*
+
+The project refers to the following tutorials as well as its code.
+1. [HandsOnOpenCL slides](https://github.com/HandsOnOpenCL/Lecture-Slides)
+2. [HandsOnOpenCL 中文翻译](https://github.com/Kivy-CN/HandsOnOpenCL_CN)
+3. [HandsOnOpenCL 练习代码](https://github.com/HandsOnOpenCL/Exercises-Solutions.git)
+
+### Requirements
+Export **cpp_common** files to the include path, especially header file **util.hpp**.
