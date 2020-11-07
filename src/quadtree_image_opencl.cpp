@@ -9,6 +9,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
+#include <opencl_common/err_code.h>
 /**
  * 第三方扩展库
  * git clone https://github.com/HandsOnOpenCL/Exercises-Solutions.git
@@ -17,6 +18,7 @@
 
 int main(int argc, char **argv)
 {
+    std::cout << CL_DEVICE_MAX_WORK_GROUP_SIZE << " " << CL_KERNEL_WORK_GROUP_SIZE << std::endl;
     cv::Mat src = cv::imread("/home/robomaster/dataset/quadtree.png");
     cv::resize(src, src, cv::Size(752, 480));
     cv::cvtColor(src, src, CV_BGR2GRAY);
@@ -30,35 +32,48 @@ int main(int argc, char **argv)
 
     try
     {
-        std::vector<cl::Device> device;
-        cl::Context context(CL_DEVICE_TYPE_DEFAULT);
-        // Get the command queue
-        cl::CommandQueue queue(context);
+        std::vector<cl::Platform> platfromList;
 
-        cl::Image2D image_input = cl::Image2D(context, CL_MEM_READ_ONLY,
-                                              cl::ImageFormat(CL_R, CL_FLOAT), src.rows, src.cols, 0, src.data);
-        cl::Image2D image_output = cl::Image2D(context, CL_MEM_WRITE_ONLY,
-                                               cl::ImageFormat(CL_R, CL_FLOAT), dst.rows, dst.cols, 0, dst.data);
+        cl::Platform::get(&platfromList);
 
+        cl_context_properties cprops[] = {CL_CONTEXT_PLATFORM, (cl_context_properties) (platfromList[0])(), 0};
 
+        cl::Context context(CL_DEVICE_TYPE_GPU, cprops);
+
+        std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+
+        cl::CommandQueue queue(context, devices[0], 0);
 
         // Load in kernel source, creating a program object for the context
-        cl::Program program(context, util::loadProgram("../src/opencl_kernel.cl"), true);
+        cl::Program program(context, util::loadProgram("../src/opencl_kernel.cl"));
 
-        cl::make_kernel<cl::Image2D, cl::Image2D> opencl_kernel(program, "opencl_kernel");
+        program.build(devices);
 
-        const cl::NDRange global(47, 16);  // equal to blocks
-        const cl::NDRange local(30, 30);  // equal to threads
 
-        opencl_kernel(cl::EnqueueArgs(queue, global, local), image_input, image_output);
+        cl::Image2D image_input = cl::Image2D(context, CL_MEM_READ_ONLY, cl::ImageFormat(CL_R, CL_FLOAT), src.rows,
+                                              src.cols, 0, src.data);
+        cl::Image2D image_output = cl::Image2D(context, CL_MEM_WRITE_ONLY, cl::ImageFormat(CL_R, CL_FLOAT), dst.rows,
+                                               dst.cols, 0, dst.data);
+
+
+        cl::make_kernel<cl::Image2D, cl::Image2D> image_kernel(program, "quadtree_image_kernel");
+
+        /**
+         * 此处表示总共有 752*480 的工作项 （total number of work-items）
+         * 同时规定了每个工作组（ per work-group）里有 16*16 的工作项（work-items）
+         * 和CUDA的规定有差别
+         */
+        const cl::NDRange global(752, 480);
+        const cl::NDRange local(16, 16);
+
+        image_kernel(cl::EnqueueArgs(global, local), image_input, image_output);
 
         queue.finish();
         // queue.enqueueReadImage()
         // cl::copy(queue, image_output, dst.begin<uchar>(), dst.end<uchar>());
-    }
-    catch (cl::Error err) {
-        std::cout << "Exception\n";
-        std::cerr << "ERROR: " << err.what() << std::endl;
+    } catch (cl::Error err)
+    {
+        std::cerr << "ERROR: " << err.what() << "(" << err_code(err.err()) << ")" <<  std::endl;
     }
     return 0;
 }
