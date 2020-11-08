@@ -66,3 +66,16 @@ The project refers to the following tutorials as well as its code.
 
 ### Requirements
 Export **cpp_common** files to the include path, especially header file **util.hpp**.
+
+### kernel function help list
+
+| Function                              | Property returned                                                                                                                         |
+|---------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| uint get_work_dim()                   | The number of dimensions 维度统计                                                                                                         |
+| size_t get_global_id(uint dimidx)     | The ID of the current work-item [0,WI) in dimension dimidx 读取该工作项在全局工作项范围内的id（输入参数为指定维度）                       |
+| size_t get_global_size(uint dimidx)   | The total number of work-items (WI) in dimension dimidx 读取该维度的工作项大小                                                            |
+| size_t get_global_offset(uint dimidx) | The offset as specified in the enqueueNDRangeKernel API in dimension dimidx                                                               |
+| size_t get_group_id(uint dimidx)      | The ID of the current work-group [0, WG) in dimension dimidx 读取该工作项在该工作组范围内的id（输入参数为指定维度）？？？                 |
+| size_t get_local_id(uint dimidx)      | The ID of the work-item within the work-group [0, WI/WG) in dimension dimidx 读取该工作项在该工作组范围内的id（输入参数为指定维度）？？？ |
+| size_t get_local_size (uint dimidx)   | The number of work-items per work-group = WI/WG in dimension dimidx                                                                       |
+| size_t get_num_groups(uint dimidx)    | The total number of work-groups (WG) in dimension dimidx                                                                                  |
