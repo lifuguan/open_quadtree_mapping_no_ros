@@ -33,7 +33,7 @@ __kernel void quadtree_image_kernel(__read_only image2d_t input_image,
 
   // 在该block内与threads共享显存
   // 该block中的16*16个像素线程的共同
-  __local int pyramid_intensity[16][16];
+  __local float pyramid_intensity[16][16];
   __local int pyramid_num[16][16];
   __local bool approve[16][16];
   __local float test[16];
@@ -45,7 +45,7 @@ __kernel void quadtree_image_kernel(__read_only image2d_t input_image,
   int2 global_coord = (int2)(x, y);
 
   // 提取该像素的像素值
-  const int4 my_intensity = read_imagei(input_image, my_sampler, global_coord);
+  const float4 my_intensity = read_imagef(input_image, my_sampler, global_coord);
 
   int pyramid_level = 0;
   float average_color = my_intensity.x;
@@ -53,14 +53,9 @@ __kernel void quadtree_image_kernel(__read_only image2d_t input_image,
   pyramid_intensity[local_x][local_y] = my_intensity.x;
   pyramid_num[local_x][local_y] = 1;
 
-  // 屏障同步函数, 完全等于CUDA __syncthreads()
-  barrier(CLK_LOCAL_MEM_FENCE);
-
   // 测试用的, 如果图片正确载入GPU, 应该读取出正常数值
   // printf("pyramid_intensity(%d, %d) = %d\n", x, y,
   //        pyramid_intensity[local_x][local_y]);
-
-  barrier(CLK_LOCAL_MEM_FENCE);
 
   // 从16×16的最粗糙区块检测是否可以再分
   for (int i = 1; i <= 4; i++) {
@@ -74,14 +69,17 @@ __kernel void quadtree_image_kernel(__read_only image2d_t input_image,
 
     if (I_AM_LAST_NODE && (level_x != local_x || level_y != local_y)) {
       // 原子相加
-      atomic_add(&pyramid_intensity[level_x][level_y],
+      atomic_add_float(&pyramid_intensity[level_x][level_y],
                  pyramid_intensity[local_x][local_y]);
       atomic_add(&(pyramid_num[level_x][level_y]),
-                pyramid_num[local_x][local_y]);
+                 pyramid_num[local_x][local_y]);
     }
     approve[level_x][level_y] = true;
 
+    // 屏障同步函数, 完全等于CUDA __syncthreads()
     barrier(CLK_LOCAL_MEM_FENCE);
+
+  
   }
 }
 
