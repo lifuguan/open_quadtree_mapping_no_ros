@@ -47,11 +47,11 @@ int main(int argc, char **argv)
         cl::CommandQueue queue(context);
 
         cl::Image2D image_input = cl::Image2D(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                              cl::ImageFormat(CL_R, CL_UNSIGNED_INT8), src.rows, src.cols, 0, src.data);
+                                              cl::ImageFormat(CL_R, CL_UNSIGNED_INT8), src.size().width, src.size().height, 0, src.data);
         cl::Image2D image_output = cl::Image2D(context, CL_MEM_WRITE_ONLY, cl::ImageFormat(CL_R, CL_UNSIGNED_INT8),
-                                               dst.rows, dst.cols, 0, dst.data);
+                                               src.size().width, src.size().height, 0, dst.data);
 
-        cl::make_kernel <cl::Image2D, cl::Image2D> image_kernel(program, "quadtree_image_kernel");
+        cl::make_kernel <cl::Image2D, cl::Image2D> image_kernel(program, "vadd");
 
         /**
          * 此处表示总共有 752*480 的工作项 （total number of work-items）
@@ -63,11 +63,24 @@ int main(int argc, char **argv)
 
         image_kernel(cl::EnqueueArgs(queue, global, local), image_input, image_output);
 
+        cl::size_t<3> origin;
+        origin[0] = 0;
+        origin[1] = 0;
+        origin[2] = 0;
+        cl::size_t<3> region;
+        region[0] = dst.size().width;
+        region[1] = dst.size().height;
+        region[2] = 1;
+
+        queue.enqueueReadImage(image_output, CL_TRUE, origin, region, 0, 0, dst.data);
+
         queue.finish();
 
     } catch (cl::Error err)
     {
         std::cerr << "ERROR: " << err.what() << "(" << err_code(err.err()) << ")" << std::endl;
     }
+    cv::imshow("test", dst);
+    cv::waitKey(10000);
     return 0;
 }
