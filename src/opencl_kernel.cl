@@ -106,8 +106,7 @@ __kernel void quadtree_image_kernel(__read_only image2d_t input_image,
   // *10 强化显示
   uint4 pixel_val = (uint4)(pyramid_level * 10, 0.0f, 0.0f, 0.0f); 
 
-  // printf("(%d, %d) = %f = %f\n", x, y, my_intensity.x, pixel_val.x);
-
+  // 写入输出图像
   write_imageui(output_image, (int2)(x, y), pixel_val);
 }
 
