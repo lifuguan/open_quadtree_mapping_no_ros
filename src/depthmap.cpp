@@ -38,7 +38,12 @@ quadmap::Depthmap::Depthmap(size_t width,
 
   printf("inremap_2itial the seed (%d x %d) fx: %f, fy: %f, cx: %f, cy: %f.\n", width, height, fx, fy, cx, fy);
 }
-
+/**
+ * 加入新的图像帧
+ * @param img_curr
+ * @param T_curr_world
+ * @return
+ */
 bool quadmap::Depthmap::add_frames( const cv::Mat &img_curr,
                                 const SE3<float> &T_curr_world)
 {

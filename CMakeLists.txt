@@ -53,13 +53,7 @@ add_executable(quadtree_image_kernel_cpu
 target_link_libraries(quadtree_image_kernel_cpu
         ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
-#add_executable(quadtree_image_kernel_cpu_test
-#        src/quadtree_image_kernel_test.cpp
-#        )
-#target_link_libraries(quadtree_image_kernel_cpu_test
-#        ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 set( OpenCL_LIBRARY "/usr/local/cuda-10.0/lib64/libOpenCL.so")
 add_executable (quadtree_image_kernel_cl src/quadtree_image_opencl.cpp)
 target_link_libraries (quadtree_image_kernel_cl ${OpenCL_LIBRARY} ${OpenCV_LIBS})
-message(${OpenCL_LIBRARY})
