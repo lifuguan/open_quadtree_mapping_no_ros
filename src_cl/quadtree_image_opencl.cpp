@@ -60,8 +60,9 @@ int main(int argc, char **argv)
         cl::Image2D image_output = cl::Image2D(context, CL_MEM_WRITE_ONLY, cl::ImageFormat(CL_R, CL_UNSIGNED_INT8),
                                                src.size().width, src.size().height, 0, dst.data);
 
+        std::vector<std::string> opencl_kernel_name = {"vadd", "quadtree_image_kernel"};
         // 调用quadtree_image_kernel核函数
-        cl::make_kernel<cl::Image2D, cl::Image2D> image_kernel(program, "quadtree_image_kernel");
+        cl::make_kernel<cl::Image2D, cl::Image2D> image_kernel(program, opencl_kernel_name[1]);
 
         /**
          * 此处表示总共有 752*480 的工作项 （total number of work-items）

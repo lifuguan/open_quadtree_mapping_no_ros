@@ -104,10 +104,24 @@ __kernel void quadtree_image_kernel(__read_only image2d_t input_image,
   pyramid_level = pyramid_level < 2 ? 2 : pyramid_level;
 
   // *10 强化显示
-  uint4 pixel_val = (uint4)(pyramid_level * 10, 0.0f, 0.0f, 0.0f); 
+  uint4 pixel_val = (uint4)(pyramid_level * 10, 0.0f, 0.0f, 0.0f);
 
   // 写入输出图像
   write_imageui(output_image, (int2)(x, y), pixel_val);
+}
+
+__kernel void generate_gradient_kernel(__read_only image2d_t input_image,
+                                    __write_only image2d_t output_image) {
+  // 获取该工作项的全局ID
+  const int x = get_global_id(0);
+  const int y = get_global_id(1);
+
+  const int width = get_image_width(input_image);   // 752
+  const int height = get_image_height(input_image); // 480
+  // printf("width : %f, height: %f\n", width, height);
+  // 该工作组中的第一个像素的local位置
+  const int local_x = get_local_id(0);
+  const int local_y = get_local_id(1);
 }
 
 /**
@@ -123,12 +137,12 @@ __kernel void vadd(__read_only image2d_t input_image,
   // printf("width : %f, height: %f\n", width, height);
 
   int2 global_coord = (int2)(x, y);
-  uint4 my_intensity =
-      read_imageui(input_image, my_sampler, global_coord);
+  uint4 my_intensity = read_imageui(input_image, my_sampler, global_coord);
 
   float average_color = my_intensity.x;
 
   // printf("pixel_val = %f\n", average_color);
 
-  write_imageui(output_image, (int2)(x, y), (uint4)(average_color, 0.0f, 0.0f, 0.0f));
+  write_imageui(output_image, (int2)(x, y),
+                (uint4)(average_color, 0.0f, 0.0f, 0.0f));
 }

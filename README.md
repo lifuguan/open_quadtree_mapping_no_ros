@@ -83,7 +83,7 @@ Export **cpp_common** files to the include path, especially header file **util.h
 ## How CUDA kernel function `generate_gradient()` work in code
 
 ### Call hierarchy
-```
+```c++
 DepthmapNode::readTumDataSet()
     ->Depthmap::add_frames()
         ->SeedMatrix::input_raw()
@@ -92,3 +92,4 @@ DepthmapNode::readTumDataSet()
                     ->generate_gradient()
                         ->__kernel__ generate_gradient()
 ```
+### What we need to do 
