@@ -67,7 +67,7 @@ The project refers to the following tutorials as well as its code.
 ### Requirements
 Export **cpp_common** files to the include path, especially header file **util.hpp**.
 
-### kernel function help list
+## kernel function help list
 
 | Function                              | Property returned                                                                                                                         |
 |---------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
@@ -79,3 +79,17 @@ Export **cpp_common** files to the include path, especially header file **util.h
 | size_t get_local_id(uint dimidx)      | The ID of the work-item within the work-group [0, WI/WG) in dimension dimidx 读取该工作项在该工作组范围内的id（输入参数为指定维度）？？？ |
 | size_t get_local_size (uint dimidx)   | The number of work-items per work-group = WI/WG in dimension dimidx                                                                       |
 | size_t get_num_groups(uint dimidx)    | The total number of work-groups (WG) in dimension dimidx                                                                                  |
+
+## How CUDA kernel function `generate_gradient()` work in code
+
+### Call hierarchy
+```c++
+DepthmapNode::readTumDataSet()
+    ->Depthmap::add_frames()
+        ->SeedMatrix::input_raw()
+            ->SeedMatrix::add_frames()
+                ->SeedMatrix::add_income_image()
+                    ->generate_gradient()
+                        ->__kernel__ generate_gradient()
+```
+### What we need to do 

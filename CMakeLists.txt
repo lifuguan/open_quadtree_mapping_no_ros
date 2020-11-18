@@ -55,5 +55,8 @@ target_link_libraries(quadtree_image_kernel_cpu
 
 
 set( OpenCL_LIBRARY "/usr/local/cuda-10.0/lib64/libOpenCL.so")
-add_executable (quadtree_image_kernel_cl src/quadtree_image_opencl.cpp)
+add_executable (quadtree_image_kernel_cl src_cl/quadtree_image_opencl.cpp)
 target_link_libraries (quadtree_image_kernel_cl ${OpenCL_LIBRARY} ${OpenCV_LIBS})
+
+add_executable (generate_gradient_cl src_cl/generate_gradient_opencl.cpp)
+target_link_libraries (generate_gradient_cl ${OpenCL_LIBRARY} ${OpenCV_LIBS})
