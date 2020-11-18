@@ -77,7 +77,7 @@ public:
 private:
   SeedMatrix seeds_;
   size_t width_;
-  size_t height_;
+  size_t height_;pixel_val
   float fx_, fy_, cx_, cy_;
 
   std::mutex ref_img_mutex_;

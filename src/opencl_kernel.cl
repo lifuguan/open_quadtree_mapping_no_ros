@@ -111,17 +111,29 @@ __kernel void quadtree_image_kernel(__read_only image2d_t input_image,
 }
 
 __kernel void generate_gradient_kernel(__read_only image2d_t input_image,
-                                    __write_only image2d_t output_image) {
+                                       __write_only image2d_t output_image) {
+
   // 获取该工作项的全局ID
   const int x = get_global_id(0);
   const int y = get_global_id(1);
 
   const int width = get_image_width(input_image);   // 752
   const int height = get_image_height(input_image); // 480
-  // printf("width : %f, height: %f\n", width, height);
-  // 该工作组中的第一个像素的local位置
-  const int local_x = get_local_id(0);
-  const int local_y = get_local_id(1);
+
+  if (x >= width - 1 || y >= height - 1 || x <= 0 || y <= 0)
+    return;
+  // width(横)方向的梯度
+  uint4 right_color = read_imageui(input_image, my_sampler, (int2)(x + 1, y));
+  uint4 left_color = read_imageui(input_image, my_sampler, (int2)(x - 1, y));
+  // height(纵)方向的梯度
+  uint4 down_color = read_imageui(input_image, my_sampler, (int2)(x, y + 1));
+  uint4 up_color = read_imageui(input_image, my_sampler, (int2)(x, y - 1));
+
+  uint4 output_pixel = (uint4)((right_color.x - left_color.x) / 2.0,
+                               (down_color.x - up_color.x) / 2.0, 0, 0);
+  // printf("gradient  = %f, %f\n", (right_color.x - left_color.x) / 2.0,
+  //        (down_color.x - up_color.x) / 2.0);
+  write_imageui(output_image, (int2)(x, y), output_pixel);
 }
 
 /**
@@ -129,6 +141,7 @@ __kernel void generate_gradient_kernel(__read_only image2d_t input_image,
  */
 __kernel void vadd(__read_only image2d_t input_image,
                    __write_only image2d_t output_image) {
+  // printf("test\n");
   const int x = get_global_id(0);
   const int y = get_global_id(1);
 
@@ -144,5 +157,5 @@ __kernel void vadd(__read_only image2d_t input_image,
   // printf("pixel_val = %f\n", average_color);
 
   write_imageui(output_image, (int2)(x, y),
-                (uint4)(average_color, 0.0f, 0.0f, 0.0f));
+                (uint4)(average_color, 10, 0.0f, 0.0f));
 }
